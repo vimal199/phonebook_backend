@@ -1,0 +1,29 @@
+{
+  "name": "phonebook_backend",
+  "version": "1.0.0",
+  "description": "Developing simple crud backend for simple phonebook",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vimal199/phonebook_backend.git"
+  },
+  "author": "vimal",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vimal199/phonebook_backend/issues"
+  },
+  "homepage": "https://github.com/vimal199/phonebook_backend#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

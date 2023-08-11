@@ -2,7 +2,7 @@ GET http://localhost:3001/api/persons
 ###
 GET http://localhost:3001/info
 ###
-GET http://localhost:3001/api/persons/5
+GET http://localhost:3001/api/persons/64d4a2dc745610f6299704b4
 ###
 DELETE  http://localhost:3001/api/persons/3
 ###
@@ -10,6 +10,19 @@ POST http://localhost:3001/api/persons
 Content-Type: application/json
 
 {
-        "name": "Dummy data10",
+        "name": "Du",
         "number": "040-45232"
 }
+###
+DELETE http://localhost:3001/api/persons/64d4a2dc745610f6299704b4
+###
+PUT http://localhost:3001/api/persons/64d542d70fc349751e673fb9
+Content-Type: application/json
+
+{
+         "name": "Dummy updated data10",
+        "number": "040-45232",
+        "id":"64d542d70fc349751e673fb9"
+}
+###
+GET http://localhost:3001/info

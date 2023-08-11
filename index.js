@@ -1,7 +1,9 @@
+require('dotenv').config()
 const express = require('express')
-const morgan = require('morgan')
 const app = express()
 const cors = require('cors')
+const Phone = require('./models/phone')
+const morgan = require('morgan')
 app.use(express.json())
 app.use(cors())
 app.use(express.static('build'))
@@ -16,7 +18,7 @@ app.use(requestLogger)*/
 //app.use(morgan('combined'))
 morgan.token('body', request => JSON.stringify(request.body))
 app.use(morgan(':method :url :body'))
-let phonedata = [
+/*let phonedata = [
     {
         "id": 1,
         "name": "Arto Hellas",
@@ -37,51 +39,79 @@ let phonedata = [
         "name": "Mary Poppendieck",
         "number": "39-23-6423122"
     }
-]
+]*/
 app.get(
-    '/api/persons', (request, response) => {
-        response.json(phonedata)
-    }
-)
-app.get(
-    '/info', (request, response) => {
-        response.send(
-            `<p> Phonebook has info for ${phonedata.length} people <br/> ${new Date()}`
+    '/api/persons', (request, response, next) => {
+        Phone.find({}).then(
+            (persons) => {
+                response.json(persons)
+            }
         )
+
     }
 )
 app.get(
-    '/api/persons/:id', (request, response) => {
-        const id = Number(request.params.id)
-        const Person = phonedata.find(
+    '/info', (request, response, next) => {
+        Phone.find({}).then(
+            (phonedata) => {
+                response.send(
+                    `<p> Phonebook has info for ${phonedata.length} people <br/> ${new Date()}`
+                )
+            }
+        ).catch((error) => { next(error) })
+    }
+)
+app.get(
+    '/api/persons/:id', (request, response, next) => {
+        const id = request.params.id
+        /*const Person = phonedata.find(
             (pers) => {
                 return pers.id === id;
             }
+        )*/
+        Phone.findById(id).then(
+            person => {
+                if (person) {
+                    response.json(person)
+                } else {
+                    response.status(404).end()
+                }
+            }
+        ).catch(
+            (error) => {
+                console.log(error)
+                next(error)
+            }
         )
-        console.log('searched person ', Person);
-        if (Person) {
+        // console.log('searched person ', person);
+        /*if (Person) {
             response.json(Person)
         } else {
             response.status(404).end()
-        }
+        }*/
     }
 )
 app.delete(
-    '/api/persons/:id', (request, response) => {
-        const id = Number(request.params.id)
+    '/api/persons/:id', (request, response, next) => {
+        /*const id = Number(request.params.id)
         phonedata = phonedata.filter(
             (data) => {
                 return data.id !== id
             }
         )
         console.log('Array after deletion', phonedata);
-        response.status(204).end
+        response.status(204).end*/
+        Phone.findByIdAndRemove(request.params.id)
+            .then(
+                (result) => {
+                    response.status(204).end()
+                }
+            ).catch(error => next(error))
     }
 )
 app.post(
-    '/api/persons', (request, response) => {
-        console.log('Entering get');
-        const maxId = phonedata.length > 0 ? Math.max(...phonedata.map(n => n.id)) : 0
+    '/api/persons', (request, response, next) => {
+        console.log('Entering post');
         const person = request.body
         if (!person.name || !person.number) {
             return response.status(400).json(
@@ -90,7 +120,7 @@ app.post(
                 }
             )
         }
-        const dataexist = phonedata.find(
+        /*const dataexist = phonedata.find(
             (data) => {
                 return data.name === person.name
             }
@@ -101,12 +131,53 @@ app.post(
                     error: 'Duplicate data already exists'
                 }
             )
-        }
-        person.id = maxId + 1
-        phonedata = phonedata.concat(person)
-        response.json(person)
+        }*/
+        const phone = new Phone(
+            {
+                name: person.name,
+                number: person.number,
+            }
+        )
+        phone.save().then(
+            (savedPhone) => {
+                response.json(savedPhone)
+            }
+        ).catch(
+            error => next(error)
+        )
+
     }
 )
+app.put('/api/persons/:id', (request, response, next) => {
+    const input_phone = request.body
+    const updates_phone = {
+        name: input_phone.name,
+        number: input_phone.number,
+    }
+    Phone.findByIdAndUpdate(request.params.id, updates_phone, { new: true, runValidators: true, context: 'query' })
+        .then(
+            out_phone => {
+                response.json(out_phone)
+            }
+        ).catch(
+            error => next(error)
+        )
+
+}
+)
+// error middleware
+const errorHandler = (error, request, response, next) => {
+    console.log(error.message)
+    if (error.name === 'CastError') {
+        return response.status(400).send({ error: 'malformatted id' })
+    }
+    if (error.name === 'ValidationError') {
+        console.log('sdsdsdds');
+        return response.status(400).json({ error: error.message })
+    }
+    next(error)
+}
+app.use(errorHandler)
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

@@ -46,6 +46,10 @@ app.get(
             (persons) => {
                 response.json(persons)
             }
+        ).catch(
+            (err) => {
+                next(err)
+            }
         )
 
     }
@@ -104,6 +108,7 @@ app.delete(
         Phone.findByIdAndRemove(request.params.id)
             .then(
                 (result) => {
+                    console.log('result is', result)
                     response.status(204).end()
                 }
             ).catch(error => next(error))
@@ -111,7 +116,7 @@ app.delete(
 )
 app.post(
     '/api/persons', (request, response, next) => {
-        console.log('Entering post');
+        console.log('Entering post')
         const person = request.body
         if (!person.name || !person.number) {
             return response.status(400).json(
@@ -172,7 +177,7 @@ const errorHandler = (error, request, response, next) => {
         return response.status(400).send({ error: 'malformatted id' })
     }
     if (error.name === 'ValidationError') {
-        console.log('sdsdsdds');
+        console.log('sdsdsdds')
         return response.status(400).json({ error: error.message })
     }
     next(error)
@@ -180,6 +185,6 @@ const errorHandler = (error, request, response, next) => {
 app.use(errorHandler)
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(`Server running on port ${PORT}`)
 }
 )

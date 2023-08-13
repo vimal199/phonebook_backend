@@ -4,10 +4,10 @@ const url = process.env.MONGODB_URI
 mongoose.set('strictQuery', false)
 console.log('connecting to ', url)
 mongoose.connect(url).then((result) => {
-    console.log('Connected to MongoDb');
+    console.log('Connected to MongoDb', result)
 })
     .catch(function (error) {
-        console.log('error connecting to MongoDB ', error.message);
+        console.log('error connecting to MongoDB ', error.message)
     })
 const phoneschema = new mongoose.Schema(
     {
@@ -24,7 +24,7 @@ const phoneschema = new mongoose.Schema(
                     return v.match(/^\d{2,3}-\d+$/mg)
                 },
                 message: (props) => {
-                    console.log('props ', props);
+                    console.log('props ', props)
                     return `${props.value} is not a valid phone number!`
                 }
             },
